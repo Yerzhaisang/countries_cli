@@ -21,11 +21,31 @@ def fetch_countries(url=BASE_URL, params=None, timeout=10):
         return None
 
 
+def parse_countries(raw_countries):
+    """Reduce raw API records to the fields the CLI needs.
+
+    Uses .get() with defaults so records missing a field (e.g. a
+    territory with no capital) do not crash the program.
+    """
+    countries = []
+    for record in raw_countries:
+        countries.append({
+            "name": record.get("name", "Unknown"),
+            "capital": record.get("capital") or "N/A",
+            "region": record.get("region") or "N/A",
+            "population": record.get("population") or 0,
+            "area": record.get("area") or 0,
+            "density": record.get("populationDensity") or 0,
+        })
+    return countries
+
+
 def main():
     print("Fetching country data from countries.dev ...")
-    countries = fetch_countries()
-    if countries is None:
+    raw_countries = fetch_countries()
+    if raw_countries is None:
         sys.exit(1)
+    countries = parse_countries(raw_countries)
     print(f"Loaded {len(countries)} countries.")
 
 
